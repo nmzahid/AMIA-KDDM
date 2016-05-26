@@ -10,14 +10,19 @@ df_infection$dateofTest=NULL
 df_infection$dateofsurgery=NULL
 mean_df=aggregate(NumAnswer ~ PID + TestType, data = df_infection, mean)
 sd_df=aggregate(NumAnswer ~ PID + TestType, data = df_infection, sd) #if only 1 test then SD is NA 
+min_df=aggregate(NumAnswer ~ PID + TestType, data = df_infection, min)
+max_df=aggregate(NumAnswer ~ PID + TestType, data = df_infection, max)
 df_infection_agg <- merge(mean_df,sd_df,by=c("PID","TestType"))
-names(df_infection_agg)=c("PID","TestType","Mean","SD")
+df_infection_agg <- merge(df_infection_agg,min_df,by=c("PID","TestType"))
+df_infection_agg <- merge(df_infection_agg,max_df,by=c("PID","TestType"))
+
+names(df_infection_agg)=c("PID","TestType","Mean","SD","Min","Max")
 
 
 library(dplyr)
 library(reshape2)
 flattened_df = melt(df_infection_agg, id.vars = c("PID","TestType"), 
-                     measure.vars = c("Mean", "SD"))
+                     measure.vars = c("Mean", "SD","Min","Max"))
 flattened_df = dcast(flattened_df, PID ~ TestType + variable, value.var = "value")
 write.csv(flattened_df,"/Users/anam/Documents/First/Masters/UW/Thesis/WoundInf_Tests_Flattened_New.csv")
 
